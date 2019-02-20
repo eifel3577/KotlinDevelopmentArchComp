@@ -1,24 +1,25 @@
 package com.example.fujitsu.kotlindevelopmentarchcomp
 
-class MainViewModel {
+import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.ViewModel
+import android.databinding.ObservableField
 
+class MainViewModel : ViewModel() {
     var repoModel: RepoModel = RepoModel()
-    var text: String = ""
-    var isLoading: Boolean = false
 
-    val onDataReadyCallback = object : OnDataReadyCallback {
-        override fun onDataReady(data: String) {
-            isLoading = false
-            text = data
-        }
-    }
+    val text = ObservableField("old data")
 
-    fun refresh() {
-        repoModel.refreshData( object : OnDataReadyCallback {
-            override fun onDataReady(data: String) {
-                text = data
+    val isLoading = ObservableField(false)
+
+    var repositories = MutableLiveData<ArrayList<Repository>>()
+
+    fun loadRepositories() {
+        isLoading.set(true)
+        repoModel.getRepositories(object : OnRepositoryReadyCallback {
+            override fun onDataReady(data: ArrayList<Repository>) {
+                isLoading.set(false)
+                repositories.value = data
             }
         })
-
     }
 }

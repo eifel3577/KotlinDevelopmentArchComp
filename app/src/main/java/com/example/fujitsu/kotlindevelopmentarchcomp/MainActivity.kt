@@ -1,23 +1,34 @@
 package com.example.fujitsu.kotlindevelopmentarchcomp
 
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.widget.LinearLayoutManager
 import com.example.fujitsu.kotlindevelopmentarchcomp.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), RepositoryRecyclerViewAdapter.OnItemClickListener {
 
-    /**я не указал ? в конце типа ActivityMainBinding, и я не инициализировал его. Как это возможно?
-     *  Модификатор lateinit позволяет нам иметь ненулевые переменные, ожидающие инициализации.  */
-    lateinit var binding:ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
+    private val repositoryRecyclerViewAdapter = RepositoryRecyclerViewAdapter(arrayListOf(), this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        var repository = Repository("MyRepo",
-            "Fleka", 1000, true)
-        binding.repository = repository
+        val viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        binding.viewModel = viewModel
         binding.executePendingBindings()
 
+        binding.repositoryRv.layoutManager = LinearLayoutManager(this)
+        binding.repositoryRv.adapter = repositoryRecyclerViewAdapter
+        viewModel.repositories.observe(this,
+            Observer<ArrayList<Repository>> { it?.let{ repositoryRecyclerViewAdapter.replaceData(it)} })
+
+    }
+
+    override fun onItemClick(position: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
